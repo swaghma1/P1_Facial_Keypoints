@@ -25,11 +25,14 @@ class Net(nn.Module):
         ## Note that among the layers to add, consider including:
         # maxpooling layers, multiple conv layers, fully-connected layers, and other layers (such as dropout or batch normalization) to avoid overfitting
         
-        ## output size = (W-F)/S +1 = (110-3)/1 +1 = 108 --> (32,108,108) --> pool => (32,54,54)
+        ## output size = (W-F)/S +1 = (110-3)/1 +1 = 108 --> (64,108,108) --> pool => (64,54,54)
         self.conv2 = nn.Conv2d(32, 64, 3)
 
-        ## output size = (W-F)/S +1 = (54-2)/1 +1 = 53 --> (32,53,53) --> pool => (32,26,26)
+        ## output size = (W-F)/S +1 = (54-2)/1 +1 = 53 --> (128,53,53) --> pool => (128,26,26)
         self.conv3 = nn.Conv2d(64, 128, 2)
+
+        ## output size = (W-F)/S +1 = (26-1)/1 +1 = 26 --> (256,26,26) --> pool => (256,13,13)
+        self.conv4 = nn.Conv2d(128, 256, 1)
 
         # maxpool layer
         # pool with kernel_size=2, stride=2
@@ -37,16 +40,16 @@ class Net(nn.Module):
         
         # 64*53*53 = 179776/136 --> 1321
         #self.fc1 = nn.Linear(64*53*53, 1321) 
-        self.fc1 = nn.Linear(128*26*26, 636) 
-
+        # self.fc1 = nn.Linear(128*26*26, 636) 
+        self.fc1 = nn.Linear(256*13*13, 318) 
         
         # dropout with p=0.4
         self.fc1_drop = nn.Dropout(p=0.4)
         
         #final output
         #self.fc2 = nn.Linear(1321, 136)
-
-        self.fc2 = nn.Linear(636, 136)
+        # self.fc2 = nn.Linear(636, 136)
+        self.fc2 = nn.Linear(318, 136)
 
         
 
@@ -57,6 +60,7 @@ class Net(nn.Module):
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
         x = self.pool(F.relu(self.conv3(x)))
+        x = self.pool(F.relu(self.conv4(x)))
 
         # prep for linear layer
         # flatten the inputs into a vector
@@ -64,7 +68,7 @@ class Net(nn.Module):
         
         # two linear layers with dropout in between
         x = F.relu(self.fc1(x))
-        x = self.fc1_drop(x)
+        # x = self.fc1_drop(x)
         x = self.fc2(x)
         
         # a modified x, having gone through all the layers of your model, should be returned
