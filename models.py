@@ -19,27 +19,35 @@ class Net(nn.Module):
         
         # As an example, you've been given a convolutional layer, which you may (but don't have to) change:
         # 1 input image channel (grayscale), 32 output channels/feature maps, 5x5 square convolution kernel
-        ## output size = (W-F)/S +1 = (224-5)/1 +1 = 220 --> (32,220,220) --> pool => (32,110,110)
-        self.conv1 = nn.Conv2d(1, 32, 5)   
+        ## output size = (W-F)/S +1 = (224-4)/1 +1 = 221 --> (32,221,221) --> pool => (32,110,110)
+        self.conv1 = nn.Conv2d(1, 32, 4)   
         
         ## Note that among the layers to add, consider including:
         # maxpooling layers, multiple conv layers, fully-connected layers, and other layers (such as dropout or batch normalization) to avoid overfitting
         
-        ## output size = (W-F)/S +1 = (110-5)/1 +1 = 106 --> (32,106,106) --> pool => (32,53,53)
-        self.conv2 = nn.Conv2d(32, 64, 5)
+        ## output size = (W-F)/S +1 = (110-3)/1 +1 = 108 --> (32,108,108) --> pool => (32,54,54)
+        self.conv2 = nn.Conv2d(32, 64, 3)
+
+        ## output size = (W-F)/S +1 = (54-2)/1 +1 = 53 --> (32,53,53) --> pool => (32,26,26)
+        self.conv3 = nn.Conv2d(64, 128, 2)
 
         # maxpool layer
         # pool with kernel_size=2, stride=2
         self.pool = nn.MaxPool2d(2, 2)
         
         # 64*53*53 = 179776/136 --> 1321
-        self.fc1 = nn.Linear(64*53*53, 1321) 
+        #self.fc1 = nn.Linear(64*53*53, 1321) 
+        self.fc1 = nn.Linear(128*26*26, 636) 
+
         
         # dropout with p=0.4
         self.fc1_drop = nn.Dropout(p=0.4)
         
         #final output
-        self.fc2 = nn.Linear(1321, 136)
+        #self.fc2 = nn.Linear(1321, 136)
+
+        self.fc2 = nn.Linear(636, 136)
+
         
 
         
@@ -48,6 +56,7 @@ class Net(nn.Module):
         ## x is the input image and, as an example, here you may choose to include a pool/conv step:
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
+        x = self.pool(F.relu(self.conv3(x)))
 
         # prep for linear layer
         # flatten the inputs into a vector
